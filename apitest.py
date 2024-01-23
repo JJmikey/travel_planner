@@ -22,6 +22,7 @@ current_task_id = 0 # A global variable to store the current task id
 def manage_tasks():
     global current_task_id # Use the global variable
     if request.method == 'GET':
+        todo_tasks = get_file("tasks.json")
         return jsonify(todo_tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
