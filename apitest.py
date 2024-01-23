@@ -8,29 +8,6 @@ Original file is located at
 """
 
 
-from flask import Flask
-
-
-app = Flask(__name__)
-run_with_ngrok(app)
-
-@app.route("/<name>")
-def home(name):
-    return f"<h1>hello {name}</h1>"
-
-app.run()
-
-from flask import Flask, jsonify
-
-app = Flask(__name__)
-run_with_ngrok(app)
-
-@app.route('/')
-def home():
-    return jsonify(message="Hello, World!")
-if __name__ == '__main__':
-    app.run()
-
 from flask import Flask, jsonify, request
 #from flask_ngrok import run_with_ngrok
 
