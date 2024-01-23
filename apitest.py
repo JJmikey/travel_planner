@@ -10,7 +10,7 @@ Original file is located at
 
 from flask import Flask, jsonify, request
 #from flask_ngrok import run_with_ngrok
-import os
+
 
 app = Flask(__name__)
 #run_with_ngrok(app)  # Start ngrok when app is run
@@ -49,6 +49,7 @@ def modify_task(id):
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
+import os
 #if __name__ == "__main__":
 #       app.run()   (run with grok先需要)
 
