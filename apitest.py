@@ -14,13 +14,17 @@ from @vercel/file-system import get_file, write_file
 
 app = Flask(__name__)
 
+todo_tasks = []
+current_task_id = 0 # A global variable to store the current task id
+
 @app.before_first_request
 def get_tasks():
     todo_tasks = get_file("tasks.json")
 
+@app.on_after_fork
+def get_tasks():
+    todo_tasks = get_file("tasks.json")
 
-todo_tasks = []
-current_task_id = 0 # A global variable to store the current task id
 
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
