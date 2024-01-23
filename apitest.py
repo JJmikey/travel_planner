@@ -46,10 +46,11 @@ def modify_task(id):
         todo_tasks.remove(task[0]) # Remove the task from the list
         return jsonify({'message': 'Task deleted'}), 200
 
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
-import os
+
 #if __name__ == "__main__":
 #       app.run()   (run with grok先需要)
 
