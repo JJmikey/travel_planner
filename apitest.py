@@ -7,12 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1qNgnxfGhEv_85yTxN0FnXi_DRvIXacS9
 """
 
-pip install flask
-
-
-
-
-
 
 from flask import Flask
 
