@@ -9,11 +9,11 @@ Original file is located at
 import os
 
 from flask import Flask, jsonify, request
-#from flask_ngrok import run_with_ngrok
+from @vercel/file-system import get_file, write_file
 
 
 app = Flask(__name__)
-#run_with_ngrok(app)  # Start ngrok when app is run
+
 
 todo_tasks = []
 current_task_id = 0 # A global variable to store the current task id
@@ -28,6 +28,7 @@ def manage_tasks():
         if task:
             current_task_id += 1 # Increment the current task id
             todo_tasks.append({'id': current_task_id, 'task': task, 'status': 'pending'}) # Add the task with the id
+            write_file("tasks.json", json.dumps({"tasks": todo_tasks}))
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
         else:
             return jsonify({'message': 'Task is required'}), 400
@@ -41,9 +42,11 @@ def modify_task(id):
     if request.method == 'PUT': # If the request method is PUT, update the task
         task[0]['task'] = request.json.get('task', task[0]['task']) # Update the task content
         task[0]['status'] = request.json.get('status', task[0]['status']) # Update the task status
+        write_file("tasks.json", json.dumps({"tasks": todo_tasks}))
         return jsonify({'message': 'Task updated'}), 200
     elif request.method == 'DELETE': # If the request method is DELETE, remove the task
         todo_tasks.remove(task[0]) # Remove the task from the list
+        write_file("tasks.json", json.dumps({"tasks": todo_tasks}))
         return jsonify({'message': 'Task deleted'}), 200
 
 
@@ -51,9 +54,4 @@ if __name__ == "__main__":
       app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
 
-#if __name__ == "__main__":
-#       app.run()   (run with grok先需要)
 
-
-
-"""# 新增區段"""
