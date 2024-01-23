@@ -7,32 +7,15 @@ Original file is located at
     https://colab.research.google.com/drive/1qNgnxfGhEv_85yTxN0FnXi_DRvIXacS9
 """
 
-!pip install flask
-!pip install flask-ngrok
+pip install flask
 
-from google.colab import drive
-drive.mount('/content/drive', force_remount=True)
 
-!mkdir -p /drive
-#umount /drive
-!mount --bind /content/drive/My\ Drive /drive
-!mkdir -p /drive/ngrok-ssh
-!mkdir -p ~/.ssh
 
-# Commented out IPython magic to ensure Python compatibility.
-!mkdir -p /drive/ngrok-ssh
-# %cd /drive/ngrok-ssh
-!wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -O ngrok-stable-linux-amd64.zip
-!unzip -u ngrok-stable-linux-amd64.zip
-!cp /drive/ngrok-ssh/ngrok /ngrok
-!chmod +x /ngrok
 
-!/ngrok authtoken 2bJNpHf4hTPhIqK2OEt5azgduaH_3uUQZhYfhSRNWtC7UVRoA
 
-!pip install flask_ngrok
 
 from flask import Flask
-from flask_ngrok import run_with_ngrok
+
 
 app = Flask(__name__)
 run_with_ngrok(app)
@@ -97,7 +80,6 @@ if __name__ == "__main__":
 #if __name__ == "__main__":
 #       app.run()   (run with grok先需要)
 
-!mkdir my_project
-!cp -r /content/* my_project/
+
 
 """# 新增區段"""
