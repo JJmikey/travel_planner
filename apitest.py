@@ -14,6 +14,10 @@ from @vercel/file-system import get_file, write_file
 
 app = Flask(__name__)
 
+@app.before_first_request
+def get_tasks():
+    todo_tasks = get_file("tasks.json")
+
 
 todo_tasks = []
 current_task_id = 0 # A global variable to store the current task id
@@ -22,7 +26,6 @@ current_task_id = 0 # A global variable to store the current task id
 def manage_tasks():
     global current_task_id # Use the global variable
     if request.method == 'GET':
-        todo_tasks = get_file("tasks.json")
         return jsonify(todo_tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
