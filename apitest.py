@@ -10,7 +10,9 @@ import os
 
 from flask import Flask, jsonify, request
 
-import pyrebase
+
+from firebase import firebase
+firebase = firebase.FirebaseApplication('https://todoapi-939ac.firebaseio.com', None)
 config = {
   "apiKey": "AIzaSyDG5dSEKziL2l9z1dqYG1zHRbB0BTy6KwI",
   "authDomain": "todoapi-939ac.firebaseapp.com",
@@ -21,7 +23,6 @@ config = {
   "measurementId": "G-21EW867HQ9"
 }
 firebase = pyrebase.initialize_app(config)
-db = firebase.database()
 
 
 
@@ -51,13 +52,13 @@ current_task_id = 0 # A global variable to store the current task id
 def manage_tasks():
     global current_task_id
     if request.method == 'GET':
-        tasks = db.child("tasks").get().val()
+       tasks = firebase.get('/tasks', None)
         return jsonify(tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
             current_task_id += 1
-            db.child("tasks").child(current_task_id).set({'id': current_task_id, 'task': task, 'status': 'pending'})
+            firebase.put('/tasks', current_task_id, {'id': current_task_id, 'task': task, 'status': 'pending'})
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
             return jsonify({'message': 'Task is required'}), 400
