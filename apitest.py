@@ -10,6 +10,19 @@ import os
 
 from flask import Flask, jsonify, request
 
+import pyrebase
+config = {
+  "apiKey": "AIzaSyDG5dSEKziL2l9z1dqYG1zHRbB0BTy6KwI",
+  "authDomain": "todoapi-939ac.firebaseapp.com",
+  "projectId": "todoapi-939ac",
+  "storageBucket": "todoapi-939ac.appspot.com",
+  "messagingSenderId": "466157987673",
+  "appId": "1:466157987673:web:464339ed7915a550ef4e48",
+  "measurementId": "G-21EW867HQ9"
+}
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+
 
 
 app = Flask(__name__)
