@@ -14,10 +14,9 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Fetch your Firebase project's credentials file (download it from the Firebase console)
-cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://todoapi-939ac.firebaseio.com'  # Replace with your Firebase project's database URL
-})
+cred = credentials.Certificate("path/to/serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
+
 
 
 
