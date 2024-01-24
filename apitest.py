@@ -10,34 +10,27 @@ import os
 
 from flask import Flask, jsonify, request
 
-from firebase import firebase
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase import FirebaseDatabase
 
-# Initialize Firebase app with the database URL
-firebase_admin.initialize_app(options={
-    'databaseURL': 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'
-})
+url= 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'
+db = FirebaseDatabase(url)
 
 app = Flask(__name__)
 
 current_task_id = 0 # A global variable to store the current task id
 
-# Get a reference to the "tasks" node in the database
-tasks_ref = db.reference('tasks')
 
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
     global current_task_id # Use the global variable
     if request.method == 'GET':
-        # Get the value of the "tasks" node as a dictionary
-        tasks = tasks_ref.get()
+        tasks = db.child("tasks").get()
         return jsonify(tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
             current_task_id += 1 # Set the value of the child node with the current task id
-            tasks_ref.child(current_task_id).set({'id': current_task_id, 'task': task, 'status': 'pending'})
+            db.child("tasks").push({'id': current_task_id, 'task': task, 'status': 'pending'})
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
         else:
             return jsonify({'message': 'Task is required'}), 400
