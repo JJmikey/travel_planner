@@ -1,5 +1,4 @@
 Flask
 werkzeug
-pycryptodome
-python-firebase
+firebase-admin
 
