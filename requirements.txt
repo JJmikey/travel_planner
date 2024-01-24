@@ -1,4 +1,4 @@
 Flask
 werkzeug
-python-firebase>=1.2.0
+firebase-admin
 
