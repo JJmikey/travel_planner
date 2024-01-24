@@ -18,18 +18,34 @@ todo_tasks = []
 current_task_id = 0 # A global variable to store the current task id
 
 
+#original code before adding firebase
+#@app.route("/tasks", methods=['GET', 'POST'])
+#def manage_tasks():
+#    global current_task_id # Use the global variable
+#    if request.method == 'GET':
+#        return jsonify(todo_tasks)
+#    elif request.method == 'POST':
+#        task = request.json.get('task', '')
+#        if task:
+#            current_task_id += 1 # Increment the current task id
+#            todo_tasks.append({'id': current_task_id, 'task': task, 'status': 'pending'}) # Add the task with the id
+#            return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
+#        else:
+#            return jsonify({'message': 'Task is required'}), 400
+
 
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
-    global current_task_id # Use the global variable
+    global current_task_id
     if request.method == 'GET':
-        return jsonify(todo_tasks)
+        tasks = db.child("tasks").get().val()
+        return jsonify(tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
-            current_task_id += 1 # Increment the current task id
-            todo_tasks.append({'id': current_task_id, 'task': task, 'status': 'pending'}) # Add the task with the id
-            return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
+            current_task_id += 1
+            db.child("tasks").child(current_task_id).set({'id': current_task_id, 'task': task, 'status': 'pending'})
+            return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
             return jsonify({'message': 'Task is required'}), 400
 
