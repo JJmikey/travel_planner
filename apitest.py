@@ -10,27 +10,51 @@ import os
 
 from flask import Flask, jsonify, request
 
-from firebase import FirebaseDatabase
+import sqlite3
 
-url= 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'
-db = FirebaseDatabase(url)
 
 app = Flask(__name__)
 
-current_task_id = 0 # A global variable to store the current task id
+
+# 初始化数据库
+def init_db():
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task TEXT NOT NULL,
+            status TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# 初始化数据库表
+init_db()
+
+#current_task_id = 0 # A global variable to store the current task id
 
 
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
-    global current_task_id # Use the global variable
+    #global current_task_id # Use the global variable
     if request.method == 'GET':
-        tasks = fdb.get('/tasks', None)
+        conn = sqlite3.connect('tasks.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM tasks')
+        tasks = cursor.fetchall()
+        conn.close()        
         return jsonify(tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
-            current_task_id += 1 # Set the value of the child node with the current task id
-            fdb.post('/tasks', {'id': current_task_id, 'task': task, 'status': 'pending'})
+            #current_task_id += 1 # Set the value of the child node with the current task id
+            conn = sqlite3.connect('tasks.db')
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO tasks (task, status) VALUES (?, ?)', (task, 'pending'))
+            conn.commit()
+            conn.close()
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
         else:
             return jsonify({'message': 'Task is required'}), 400
