@@ -32,7 +32,7 @@ current_task_id = 0 # A global variable to store the current task id
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
     global current_task_id # Use the global variable
-   if request.method == 'GET':
+    if request.method == 'GET':
         ref = db.reference('/tasks')
         tasks = ref.get()  # Retrieve tasks from Firebase
         return jsonify(todo_tasks)
