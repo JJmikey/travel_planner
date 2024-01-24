@@ -12,7 +12,7 @@ from flask import Flask, jsonify, request
 
 from firebase import firebase
 import firebase_admin
-from firebase_admin import db
+from firebase_admin import credentials, firestore
 
 # Initialize Firebase app with the database URL
 firebase_admin.initialize_app(options={
