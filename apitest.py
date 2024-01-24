@@ -7,22 +7,27 @@ Original file is located at
     https://colab.research.google.com/drive/1qNgnxfGhEv_85yTxN0FnXi_DRvIXacS9
 """
 import os
-
+import json
 
 from flask import Flask, jsonify, request
+
 
 import firebase_admin
 from firebase_admin import credentials, db
 
-# Fetch your Firebase project's credentials file (download it from the Firebase console)
-cred = credentials.Certificate("path/to/serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
-
-
-
 
 
 app = Flask(__name__)
+
+# Get the environment variable and parse it as a JSON object
+service_account = json.loads(os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY'))
+
+
+# Initialize Firebase services with the credential object
+cred = credentials.Certificate(service_account)
+firebase_admin.initialize_app(cred)
+db = firebase_admin.firestore.client()
+
 
 todo_tasks = []
 current_task_id = 0 # A global variable to store the current task id
@@ -33,18 +38,16 @@ current_task_id = 0 # A global variable to store the current task id
 def manage_tasks():
     global current_task_id # Use the global variable
     if request.method == 'GET':
-        ref = db.reference('/tasks')
-        tasks = ref.get()  # Retrieve tasks from Firebase
-        return jsonify(todo_tasks)
+        tasks = db.collection("tasks").get()
+        return jsonify([task.to_dict() for task in tasks])
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
             current_task_id += 1 # Increment the current task id
-            ref = db.reference('/tasks').push({'id': current_task_id, 'task': task, 'status': 'pending'})
+            db.collection("tasks").document(str(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
         else:
             return jsonify({'message': 'Task is required'}), 400
-
 
 
 
