@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1qNgnxfGhEv_85yTxN0FnXi_DRvIXacS9
 """
 import os
-print(os.path.abspath('apitest.py'))
+
 
 from flask import Flask, jsonify, request
 
