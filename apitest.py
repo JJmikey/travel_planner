@@ -18,7 +18,8 @@ app = Flask(__name__)
 
 # 初始化数据库
 def init_db():
-    conn = sqlite3.connect('tasks.db')
+    db_path = os.path.join(os.getcwd(), 'tasks.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
