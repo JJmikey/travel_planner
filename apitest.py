@@ -10,19 +10,15 @@ import os
 
 from flask import Flask, jsonify, request
 
+import firebase_admin
+from firebase_admin import credentials, db
 
-from firebase import firebase
-firebase = firebase.FirebaseApplication('https://todoapi-939ac.firebaseio.com', None)
-config = {
-  "apiKey": "AIzaSyDG5dSEKziL2l9z1dqYG1zHRbB0BTy6KwI",
-  "authDomain": "todoapi-939ac.firebaseapp.com",
-  "projectId": "todoapi-939ac",
-  "storageBucket": "todoapi-939ac.appspot.com",
-  "messagingSenderId": "466157987673",
-  "appId": "1:466157987673:web:464339ed7915a550ef4e48",
-  "measurementId": "G-21EW867HQ9"
-}
-firebase = pyrebase.initialize_app(config)
+# Fetch your Firebase project's credentials file (download it from the Firebase console)
+cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://todoapi-939ac.firebaseio.com'  # Replace with your Firebase project's database URL
+})
+
 
 
 
@@ -33,35 +29,24 @@ current_task_id = 0 # A global variable to store the current task id
 
 
 #original code before adding firebase
-#@app.route("/tasks", methods=['GET', 'POST'])
-#def manage_tasks():
-#    global current_task_id # Use the global variable
-#    if request.method == 'GET':
-#        return jsonify(todo_tasks)
-#    elif request.method == 'POST':
-#        task = request.json.get('task', '')
-#        if task:
-#            current_task_id += 1 # Increment the current task id
-#            todo_tasks.append({'id': current_task_id, 'task': task, 'status': 'pending'}) # Add the task with the id
-#            return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
-#        else:
-#            return jsonify({'message': 'Task is required'}), 400
-
-
 @app.route("/tasks", methods=['GET', 'POST'])
 def manage_tasks():
-    global current_task_id
-    if request.method == 'GET':
-       tasks = firebase.get('/tasks', None)
-        return jsonify(tasks)
+    global current_task_id # Use the global variable
+   if request.method == 'GET':
+        ref = db.reference('/tasks')
+        tasks = ref.get()  # Retrieve tasks from Firebase
+        return jsonify(todo_tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
-            current_task_id += 1
-            firebase.put('/tasks', current_task_id, {'id': current_task_id, 'task': task, 'status': 'pending'})
-            return jsonify({'message': 'Task added', 'id': current_task_id}), 201
+            current_task_id += 1 # Increment the current task id
+            ref = db.reference('/tasks').push({'id': current_task_id, 'task': task, 'status': 'pending'})
+            return jsonify({'message': 'Task added', 'id': current_task_id}), 201 # Return the id of the added task
         else:
             return jsonify({'message': 'Task is required'}), 400
+
+
+
 
 
 @app.route("/tasks/<int:id>", methods=['PUT', 'DELETE'])
