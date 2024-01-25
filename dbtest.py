@@ -8,7 +8,7 @@ Original file is located at
 """
 import os
 
-from flask import Flask, jsonify, request
+from Flask import Flask, jsonify, request
 
 
 app = Flask(__name__)
