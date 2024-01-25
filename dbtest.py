@@ -1,23 +1,33 @@
 # app.py
 import os 
-
+import json
 from flask import Flask, jsonify, request
+import firebase_admin
+from firebase_admin import credentials, db
+
+# Load the credentials from environment variable
+service_account_info = json.loads(os.getenv('FIREBASE_SERVICE_ACCOUNT'))
+
+# Initialize the Firebase application with Firebase database URL
+firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'})
 
 app = Flask(__name__)
 
-todo_tasks = []
 current_task_id = 0
 
 @app.route("/", methods=['GET', 'POST'])
 def manage_tasks():
     global current_task_id
     if request.method == 'GET':
+        # Read from Firebase
+        todo_tasks = db.reference("/").get()
         return jsonify(todo_tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
             current_task_id += 1
-            todo_tasks.append({'id': current_task_id, 'task': task, 'status': 'pending'})
+            # Write to Firebase
+            db.reference("/").push({'id': current_task_id, 'task': task, 'status': 'pending'})
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
             return jsonify({'message': 'Task is required'}), 400
