@@ -22,7 +22,7 @@ def manage_tasks():
         else:
             return jsonify({'message': 'Task is required'}), 400
 
-@app.route("/tasks/<int:id>", methods=['PUT', 'DELETE'])
+@app.route("/<int:id>", methods=['PUT', 'DELETE'])
 def modify_task(id):
     task = [t for t in todo_tasks if t['id'] == id]
     if len(task) == 0:
