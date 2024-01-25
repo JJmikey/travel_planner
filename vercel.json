@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dbtest.py",
+      "src": "apitest.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "10mb"
@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dbtest.py"
+      "dest": "apitest.py"
     }
   ]
 }
