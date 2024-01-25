@@ -9,10 +9,10 @@
             }
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/(.*)",
-            "dest": "dbtest.py"
+            "source": "/(.*)",
+            "destination": "dbtest.py"
         }
     ],
     "headers": [
