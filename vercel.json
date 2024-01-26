@@ -1,4 +1,3 @@
-
 {
     "version": 2,
     "builds": [
@@ -8,6 +7,12 @@
             "config": {
                 "maxLambdaSize": "10mb"
             }
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "dbtest.py"
         }
     ],
     "headers": [
