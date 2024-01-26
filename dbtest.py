@@ -52,16 +52,14 @@ def manage_specific_task(id):
     ref = db.reference("/")
     task = ref.get()  # Fetch all tasks
     
-    if task is None:
-        for task_ref in tasks.keys(): # Iterate through all task references
-                      
+    if task is not None:
+        for task_ref in tasks.keys(): 
+
+            task = tasks[task_ref]
             if task_ref == "current_task_id": # Skip the non-task property
                 continue
 
-            task = tasks[task_ref]
-
-            if task['id'] == id:
-            
+            if task['id'] == id:         
                 ref_task = db.reference("/" + task_ref) # Point to the specific task with its reference
 
                 if request.method == 'PUT':
