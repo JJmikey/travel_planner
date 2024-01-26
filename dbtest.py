@@ -55,7 +55,7 @@ def manage_specific_task(id):
         return jsonify({'message': 'Task not found'}), 404
 
     if request.method == 'PUT':
-         task_data = {
+        task_data = {
             'id': id,
             'task': request.json.get('task', task['task']),
             'status': request.json.get('status', task['status'])
