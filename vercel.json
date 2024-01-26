@@ -1,15 +1,19 @@
+
 {
     "version": 2,
-    "functions": {
-            "dbtest.py": {
-            "runtime": "@vercel/python",   
-            "maxLambdaSize": "10mb",
-        }
-    },
-   "rewrites": [
+    "builds": [
         {
-            "source": "/(.*)",
-            "destination": "dbtest.py"
+            "src": "dbtest.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "10mb"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "dbtest.py"
         }
     ],
     "headers": [
