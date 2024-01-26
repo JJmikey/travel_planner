@@ -52,7 +52,7 @@ def manage_tasks():
 @app.route("/<int:id>", methods=['PUT', 'DELETE'])
 def manage_specific_task(id):
     ref = db.reference("/")
-    task = ref.get()  # Fetch all tasks
+    tasks = ref.get()  # Fetch all tasks
     
     if task is not None:
         for task_ref in tasks.keys(): 
