@@ -48,16 +48,22 @@ def manage_tasks():
             return jsonify({'message': 'Task is required'}), 400
 
 @app.route("/<int:id>", methods=['PUT', 'DELETE'])
-def modify_task(id):
-    task = [t for t in todo_tasks if t['id'] == id]
-    if len(task) == 0:
+def manage_specific_task(id):
+    ref = db.reference("/-{}".format(id))
+    task = ref.get()
+    if task is None:
         return jsonify({'message': 'Task not found'}), 404
+
     if request.method == 'PUT':
-        task[0]['task'] = request.json.get('task', task[0]['task'])
-        task[0]['status'] = request.json.get('status', task[0]['status'])
+         task_data = {
+            'id': id,
+            'task': request.json.get('task', task['task']),
+            'status': request.json.get('status', task['status'])
+        }
+        ref.set(task_data)
         return jsonify({'message': 'Task updated'}), 200
-    elif request.method == 'DELETE':
-        todo_tasks.remove(task[0])
+   elif request.method == 'DELETE':
+        ref.delete()
         return jsonify({'message': 'Task deleted'}), 200
 
 
