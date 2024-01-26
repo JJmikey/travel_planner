@@ -25,7 +25,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
 def manage_tasks():
-     ref = db.reference("/")
+    ref = db.reference("/")
     if request.method == 'GET':
         # Read from Firebase
         todo_tasks = ref.get()
