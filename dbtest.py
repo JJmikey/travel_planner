@@ -81,7 +81,8 @@ def manage_specific_task(id):
                         app.logger.error('Task deletion successful.') 
 
                         # Update current_task_id to max task id
-                        max_id = max(int(task_id) for task_id in tasks.keys() if task_id != "current_task_id")
+                        task_ids = [int(task_id) for task_id in tasks.keys() if task_id != "current_task_id"]
+                        max_id = max(task_ids) if task_ids else 0 # -1 or 0, based on how you define task id
                         ref = db.reference("/current_task_id")
                         ref.set(max_id)
                     except Exception as e:
