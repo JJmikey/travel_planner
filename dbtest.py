@@ -1,12 +1,21 @@
 # app.py
 import os 
 import json
+
+# Load the credentials from environment variable
+firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
+if firebase_service_account is not None:
+    service_account_info = json.loads(firebase_service_account)
+else:
+    print("'FIREBASE_SERVICE_ACCOUNT' is not set or empty")
+    # handle this error appropriately...
+
+
 from flask import Flask, jsonify, request
 import firebase_admin
 from firebase_admin import credentials, db
 
-# Load the credentials from environment variable
-service_account_info = json.loads(os.getenv('FIREBASE_SERVICE_ACCOUNT'))
+
 
 # Initialize the Firebase application with Firebase database URL
 firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'})
