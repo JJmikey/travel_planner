@@ -75,7 +75,7 @@ def manage_specific_task(id):
 
                     return jsonify({'message': 'Task updated'}), 200
 
-               elif request.method == 'DELETE':
+                elif request.method == 'DELETE':
                    ref_task.delete() # Delete the task
 
                    return jsonify({'message': 'Task deleted'}), 200
