@@ -43,7 +43,7 @@ def manage_tasks():
             else:
                 current_task_id += 1
             # Write to Firebase
-            ref.child("-{}".format(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
+            ref.child("{}".format(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
             ref.child("current_task_id").set(current_task_id)
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
