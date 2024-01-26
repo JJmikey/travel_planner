@@ -22,21 +22,27 @@ firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'d
 
 app = Flask(__name__)
 
-current_task_id = 0
 
 @app.route("/", methods=['GET', 'POST'])
 def manage_tasks():
-    global current_task_id
+     ref = db.reference("/")
     if request.method == 'GET':
         # Read from Firebase
-        todo_tasks = db.reference("/").get()
+        todo_tasks = ref.get()
         return jsonify(todo_tasks)
     elif request.method == 'POST':
         task = request.json.get('task', '')
         if task:
-            current_task_id += 1
+            # Get current_task_id from Firebase and increment it
+            current_task_id = ref.child("current_task_id").get()
+            if current_task_id is None:
+                # If it doesn't exist, start it at 1
+                current_task_id = 1
+            else:
+                current_task_id += 1
             # Write to Firebase
-            db.reference("/").push({'id': current_task_id, 'task': task, 'status': 'pending'})
+            ref.child("-{}".format(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
+            ref.child("current_task_id").set(current_task_id)
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
             return jsonify({'message': 'Task is required'}), 400
