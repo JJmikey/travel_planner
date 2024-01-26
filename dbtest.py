@@ -25,7 +25,7 @@ firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'d
 app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
 
-@app.route("/tasks", methods=['GET', 'POST'])
+@app.route("/task", methods=['GET', 'POST'])
 def manage_tasks():
     ref = db.reference("/")
     if request.method == 'GET':
