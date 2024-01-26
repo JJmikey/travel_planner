@@ -63,7 +63,7 @@ def manage_specific_task(id):
 
             if task['id'] == id:         
                 ref_task = db.reference("/" + task_ref) # Point to the specific task with its reference
-
+                app.logger.info('Referencing: %s', "/" + task_ref) # Log the reference
                 if request.method == 'PUT':
                     task_data = {
                         'id': id,
