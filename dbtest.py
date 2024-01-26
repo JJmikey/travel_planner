@@ -54,7 +54,7 @@ def manage_specific_task(id):
     ref = db.reference("/")
     tasks = ref.get()  # Fetch all tasks
     
-    if task is not None:
+    if tasks is not None:
         for task_ref in tasks.keys(): 
 
             task = tasks[task_ref]
