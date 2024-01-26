@@ -12,6 +12,8 @@ else:
 
 
 from flask import Flask, jsonify, request
+import logging
+
 import firebase_admin
 from firebase_admin import credentials, db
 
@@ -21,7 +23,7 @@ from firebase_admin import credentials, db
 firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'})
 
 app = Flask(__name__)
-
+app.logger.setLevel(logging.ERROR)
 
 @app.route("/", methods=['GET', 'POST'])
 def manage_tasks():
