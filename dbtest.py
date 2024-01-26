@@ -49,25 +49,36 @@ def manage_tasks():
 
 @app.route("/<int:id>", methods=['PUT', 'DELETE'])
 def manage_specific_task(id):
-    ref = db.reference("/-{}".format(id))
-    task = ref.get()
+    ref = db.reference("/")
+    task = ref.get()  # Fetch all tasks
+    
     if task is None:
-        return jsonify({'message': 'Task not found'}), 404
+        for task_ref in tasks.keys(): # Iterate through all task references
+            task = tasks[task_ref]
+            
+        if task['id'] == id:
 
-    if request.method == 'PUT':
-        task_data = {
-            'id': id,
-            'task': request.json.get('task', task['task']),
-            'status': request.json.get('status', task['status'])
-        }
-        ref.set(task_data)
-        return jsonify({'message': 'Task updated'}), 200
-    elif request.method == 'DELETE':
-        ref.delete()
-        return jsonify({'message': 'Task deleted'}), 200
+            ref_task = db.reference("/" + task_ref) # Point to the specific task with its reference
 
+            if request.method == 'PUT':
+                task_data = {
+                        'id': id,
+                        'task': request.json.get('task', task['task']),
+                        'status': request.json.get('status', task['status'])
+                }
+                
+                ref_task.update(task_data) # Update the task
 
+                return jsonify({'message': 'Task updated'}), 200
 
+        elif request.method == 'DELETE':
+                    ref_task.delete() # Delete the task
+
+                    return jsonify({'message': 'Task deleted'}), 200
+                
+    return jsonify({'message': 'Task not found'}), 404 # Task was not found if we reach here
+
+   
 
 if __name__ == "__main__":
       app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
