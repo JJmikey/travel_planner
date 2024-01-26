@@ -60,8 +60,6 @@ def modify_task(id):
         todo_tasks.remove(task[0])
         return jsonify({'message': 'Task deleted'}), 200
 
-# gunicorn command in start script
-# gunicorn -w 4 -b 0.0.0.0:$PORT app:app
 
 
 
