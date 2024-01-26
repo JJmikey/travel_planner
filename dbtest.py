@@ -74,9 +74,14 @@ def manage_specific_task(id):
                     return jsonify({'message': 'Task updated'}), 200
 
                 elif request.method == 'DELETE':
-                   ref_task.delete() # Delete the task
+                    try:
+                        ref_task.delete() # Delete the task
+                        app.logger.error('Task deletion successful.')  
+                    except Exception as e:
+                        app.logger.error('Task deletion failed. Error: %s', e)
+                        return str(e), 500
 
-                   return jsonify({'message': 'Task deleted'}), 200
+                    return jsonify({'message': 'Task deleted'}), 200
 
     return jsonify({'message': 'Task not found'}), 404 # Task was not found if we reach here
 
