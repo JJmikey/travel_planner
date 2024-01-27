@@ -71,7 +71,7 @@ def manage_specific_task():  # 不需要参数id
         else:
             return jsonify({'message': 'Task not found'}), 404
 
-     elif request.method == 'DELETE':
+    elif request.method == 'DELETE':
         task = ref.get()
         if task:
             ref.delete()
