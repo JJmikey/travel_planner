@@ -52,7 +52,9 @@ def manage_tasks():
 @app.route("/task", methods=['PUT', 'DELETE'])
 def manage_specific_task():  # 不需要参数id
     task_id = request.args.get('id', type=int)
-    # ... 这里的代码是相同的，你只是不再使用URL路径参数但仍然使用task_id来进行操作
+    # Ensure you're logging the task_id to check if it's being captured correctly
+    app.logger.info('Task ID: %d', task_id)
+    
     ref = db.reference("/")
     tasks = ref.get()  # Fetch all tasks
     
