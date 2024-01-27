@@ -49,8 +49,10 @@ def manage_tasks():
         else:
             return jsonify({'message': 'Task is required'}), 400
 
-@app.route("/<int:id>", methods=['PUT', 'DELETE'])
+@app.route("/task", methods=['PUT', 'DELETE'])
 def manage_specific_task(id):
+    task_id = request.args.get('id', type=int)
+    # ... 这里的代码是相同的，你只是不再使用URL路径参数但仍然使用task_id来进行操作
     ref = db.reference("/")
     tasks = ref.get()  # Fetch all tasks
     
