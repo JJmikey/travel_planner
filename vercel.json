@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "dbtest.py",
+            "src": "todo4coze.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "10mb"
@@ -12,7 +12,7 @@
     "rewrites": [
         {
             "source": "/task",
-            "destination": "dbtest.py"
+            "destination": "todo4coze.py"
         }
     ],
     "headers": [
