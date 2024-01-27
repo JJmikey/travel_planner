@@ -74,8 +74,8 @@ def manage_specific_task():  # 不需要参数id
     elif request.method == 'DELETE':
         task = ref.get()
         if task:
-            ref.delete()　# 删除当前任务
-
+            ref.delete()　#删除当前任务
+            
             # 如果您需要的话，在这里可以更新current_task_id
             # 但是请注意，`ref.get()`不是用来获取所有任务的。
             # 您需要重新获取所有任务的引用，来找到新的最大ID。
