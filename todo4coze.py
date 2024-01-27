@@ -72,9 +72,15 @@ def manage_specific_task():  # 不需要参数id
             return jsonify({'message': 'Task not found'}), 404
 
     elif request.method == 'DELETE':
-        task = ref.get()
+        # 根据task_id找到对应的任务引用
+        task_ref = db.reference(f"/{task_id}")
+
+        # 尝试获取这个引用指向的任务
+        task = task_ref.get()
+        
         if task:
-            ref.delete() #delete the current task
+            # 如果找到了任务，则删除这个任务
+            task_ref.delete()
             
             # 如果您需要的话，在这里可以更新current_task_id
             # 但是请注意，`ref.get()`不是用来获取所有任务的。
