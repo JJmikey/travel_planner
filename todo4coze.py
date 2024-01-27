@@ -74,18 +74,23 @@ def manage_specific_task():  # 不需要参数id
     elif request.method == 'DELETE':
         task = ref.get()
         if task:
-            ref.delete()
-            task = ref.get() # Fetch all tasks again after the delete
-            task_ids = [int(task_id) for task_id in tasks.keys() if task_id != "current_task_id"]
-            max_id = max(task_ids) if task_ids else 0 # -1 or 0, based on how you define task id
-            ref = db.reference("/current_task_id")
-            ref.set(max_id)
+            ref.delete()　# 删除当前任务
+
+            # 如果您需要的话，在这里可以更新current_task_id
+            # 但是请注意，`ref.get()`不是用来获取所有任务的。
+            # 您需要重新获取所有任务的引用，来找到新的最大ID。
+            all_tasks_ref = db.reference("/") # 这是所有任务的引用
+            all_tasks = all_tasks_ref.get() # 获取所有任务
+            if all_tasks:
+                task_ids = [int(task_id) for task_id in all_tasks.keys() if task_id != "current_task_id"]
+                max_id = max(task_ids) if task_ids else 0 # 根据您的业务逻辑，这里可以是-1或0
+                current_task_id_ref = db.reference("/current_task_id")
+                current_task_id_ref.set(max_id) # 更新current_task_id
+
             return jsonify({'message': 'Task deleted'}), 200
         else:
             return jsonify({'message': 'Task not found'}), 404
-
-
-          
+                     
        
 
 if __name__ == "__main__":
