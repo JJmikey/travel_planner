@@ -1,3 +1,4 @@
 Flask
 werkzeug
 firebase-admin
+requests
