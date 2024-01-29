@@ -30,6 +30,43 @@ webhook_url = os.getenv('SLACK_WEBHOOK_URL')
 app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
 
+
+def notify_addTask():
+    # set the message
+    message = f"任務加好了!"
+
+    # convert to slack message
+    slack_data = {'text': message}
+
+    # post to Slack webhook URL
+    response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})
+
+def notify_editTask():
+    # set the message
+    message = f"任務改好了!"
+
+    # convert to slack message
+    slack_data = {'text': message}
+
+    # post to Slack webhook URL
+    response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})   
+
+    if response.status_code != 200:
+        raise ValueError(f"Request to slack returned an error {response.status_code}, the response is:\n{response.text}")
+
+def notify_deleteTask():
+    # set the message
+    message = f"任務已刪除了!"
+
+    # convert to slack message
+    slack_data = {'text': message}
+
+    # post to Slack webhook URL
+    response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})
+
+if __name__ == "__main__":
+      app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
+
 @app.route("/task", methods=['GET', 'POST'])
 def manage_tasks():
     ref = db.reference("/")
@@ -50,6 +87,7 @@ def manage_tasks():
             # Write to Firebase
             ref.child("{}".format(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
             ref.child("current_task_id").set(current_task_id)
+            notify_addTask() # send notify to webhook URL
             return jsonify({'message': 'Task added', 'id': current_task_id}), 201
         else:
             return jsonify({'message': 'Task is required'}), 400
@@ -72,6 +110,7 @@ def manage_specific_task():  # 不需要参数id
                 'status': data.get('status', task['status'])
             }
             ref.update(task_data)
+            notify_editTask() # send notify to webhook URL
             return jsonify({'message': 'Task updated'}), 200
         else:
             return jsonify({'message': 'Task not found'}), 404
@@ -86,6 +125,7 @@ def manage_specific_task():  # 不需要参数id
         if task:
             # 如果找到了任务，则删除这个任务
             task_ref.delete()
+            notify_deleteTask() # send notify to webhook URL
             
             # 如果您需要的话，在这里可以更新current_task_id
             # 但是请注意，`ref.get()`不是用来获取所有任务的。
@@ -104,5 +144,4 @@ def manage_specific_task():  # 不需要参数id
                      
        
 
-if __name__ == "__main__":
-      app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
+
