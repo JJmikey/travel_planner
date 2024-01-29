@@ -22,6 +22,11 @@ from firebase_admin import credentials, db
 # Initialize the Firebase application with Firebase database URL
 firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://todoapi-939ac-default-rtdb.asia-southeast1.firebasedatabase.app/'})
 
+# link to Slack webhook URL
+webhook_url = os.getenv('SLACK_WEBHOOK_URL')
+
+
+
 app = Flask(__name__)
 app.logger.setLevel(logging.ERROR)
 
