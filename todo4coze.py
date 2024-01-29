@@ -1,6 +1,7 @@
 # app.py
 import os 
 import json
+import requests
 
 # Load the credentials from environment variable
 firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
