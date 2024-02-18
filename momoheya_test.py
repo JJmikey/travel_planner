@@ -137,8 +137,12 @@ def post_chat():
         message_id = last_message_id  # 使用更新後的 last_message_id 作為當前消息的 ID。
 
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
-        ref.child("{}".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        ref.child("{}".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        #ref.child("{}".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        #ref.child("{}".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        
+        ref.child("messages/{}/user".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        ref.child("messages/{}/model".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        
         return jsonify({'message': 'chat added', 'id': message_id}), 201
 
         # 分別發送用戶訊息和模型回應到 Firebase。
