@@ -101,36 +101,48 @@ def get_chat():
     
 @app.route("/main", methods=['POST'])
 def post_chat():
-    global last_message_id, message_id
-    # 從 HTTP 請求的 body 中解析 JSON。
-    chat_data = request.json
-    firebase_url = "https://momoheya.vercel.app/main"
-    ref = db.reference("/")
-    if chat_data:
-        # Get the last message id from Firebase and increment it
-        last_message_id = ref.child("last_message_id").get() or 0
-        last_message_id += 1
+    try:
+        global last_message_id, message_id
+        # 從 HTTP 請求的 body 中解析 JSON。
+        chat_data = request.json
+        firebase_url = "https://momoheya.vercel.app/main"
+        ref = db.reference("/")
+
+        # 確定 chat_data 是否包含所需的鍵
+        if chat_data is None or 'user_prompt' not in chat_data or 'model_reply' not in chat_data:
+            # 紀錄錯誤信息和收到的 chat_data，以便排查問題
+            print("Error: 'user_prompt' or 'model_reply' missing in received data.", chat_data)
+            return jsonify({"error": "Missing data in request"}), 400
+
+
+        if chat_data:
+            # Get the last message id from Firebase and increment it
+            last_message_id = ref.child("last_message_id").get() or 0
+            last_message_id += 1
 
 
 
-    # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
-    user_prompt = chat_data["user_prompt"]
-    model_response = chat_data["model_reply"]
-    message_id = last_message_id  # 使用更新後的 last_message_id 作為當前消息的 ID。
+        # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
+        user_prompt = chat_data["user_prompt"]
+        model_response = chat_data["model_reply"]
+        message_id = last_message_id  # 使用更新後的 last_message_id 作為當前消息的 ID。
 
 
-    # 分別發送用戶訊息和模型回應到 Firebase。
-    resp1 = post_message("user", user_prompt, message_id, firebase_url)
-    resp2 = post_message("model", model_response, message_id, firebase_url)
+        # 分別發送用戶訊息和模型回應到 Firebase。
+        resp1 = post_message("user", user_prompt, message_id, firebase_url)
+        resp2 = post_message("model", model_response, message_id, firebase_url)
 
-    # Update the last message id 
-    ref.child("last_message_id").set(last_message_id)
+        # Update the last message id 
+        ref.child("last_message_id").set(last_message_id)
 
 
 
-    # 返回一個 JSON 響應，包含了發送結果。
-    return jsonify({"user_message_status": resp1.status_code, "model_message_status": resp2.status_code})
-
+        # 返回一個 JSON 響應，包含了發送結果。
+        return jsonify({"user_message_status": resp1.status_code, "model_message_status": resp2.status_code})
+    
+    except Exception as e:
+        # 在實際部署時，應該要有更好的錯誤處理機制
+        return jsonify({"error": str(e)}), 500
     
 
 
