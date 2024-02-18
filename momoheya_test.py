@@ -139,6 +139,24 @@ def post_chat():
         resp1 = post_message("user", user_prompt, message_id, firebase_url)
         resp2 = post_message("model", model_response, message_id, firebase_url)
 
+        # 檢查resp1和resp2是否為Response對象
+        if isinstance(resp1, requests.Response) and isinstance(resp2, requests.Response):
+            # 如果是Response對象，則可以安全地訪問status_code屬性
+            pass  # 這裡做進一步處理，例如update last_message_id等
+        else:
+            # 如果不是Response對象，則處理錯誤
+            error_messages = []
+            if isinstance(resp1, dict) and "error" in resp1:
+                error_messages.append(resp1["error"])
+            if isinstance(resp2, dict) and "error" in resp2:
+                error_messages.append(resp2["error"])
+            error_info = " ".join(error_messages)
+            # 可以在這裡記錄錯誤或者返回錯誤信息，例如通過print函數或者將錯誤發送到日誌系統
+            print(error_info)
+            # 返回帶有錯誤信息的HTTP響應給前端
+            return jsonify({"error": error_info}), 500
+
+
         # 檢查是否成功發送了請求
         if resp1 is not None and resp2 is not None:
             # 如果兩個響應都不是 None，則進行下一步
