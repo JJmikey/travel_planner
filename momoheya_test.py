@@ -136,14 +136,25 @@ def post_chat():
         resp1 = post_message("user", user_prompt, message_id, firebase_url)
         resp2 = post_message("model", model_response, message_id, firebase_url)
 
-        # Update the last message id 
-        ref.child("last_message_id").set(last_message_id)
+        # 檢查是否成功發送了請求
+        if resp1 is not None and resp2 is not None:
+            # 如果兩個響應都不是 None，則進行下一步
+            ref.child("last_message_id").set(last_message_id)
+            return jsonify({
+                "user_message_status": resp1.status_code, 
+                "model_message_status": resp2.status_code
+            })
+        else:
+            # 如果有一個請求失敗，處理錯誤
+            error_message = "Failed to send message to Firebase."
+            # 如果resp1是 None，判斷是第一個請求失敗
+            if resp1 is None:
+                error_message += " User message failed."
+            # 如果resp2是 None，判斷是第二個請求失敗
+            if resp2 is None:
+                error_message += " Model message failed."
+            return jsonify({"error": error_message}), 500     
 
-
-
-        # 返回一個 JSON 響應，包含了發送結果。
-        return jsonify({"user_message_status": resp1.status_code, "model_message_status": resp2.status_code})
-    
     except Exception as e:
         # 在實際部署時，應該要有更好的錯誤處理機制
         return jsonify({"error": str(e)}), 500
