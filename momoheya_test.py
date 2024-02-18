@@ -84,11 +84,14 @@ def post_message(role, parts, message_id, firebase_url):
         response.raise_for_status()  # 如果HTTP請求有錯則會拋出HTTPError
         return response
     except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")  # 提供更具體的錯誤信息
+        error_detail = f"HTTP error (role: {role}, id: {message_id}): {http_err}"
+        print(error_detail)  # 記錄詳細的HTTP錯誤信息
+        return {"error": error_detail, "status_code": None}
     except Exception as err:
-        print(f"Other error occurred: {err}")
-    # 如果遇到錯誤，返回None或者自訂錯誤處理
-    return None
+        error_detail = f"Other error (role: {role}, id: {message_id}): {err}"
+        print(error_detail)  # 記錄其他錯誤信息
+        return {"error": error_detail, "status_code": None}
+  
 
 
 
