@@ -105,10 +105,10 @@ def post_chat():
     # 從 HTTP 請求的 body 中解析 JSON。
     chat_data = request.json
     firebase_url = "https://momoheya.vercel.app/main"
-    
+    ref = db.reference("/")
     if chat_data:
         # Get the last message id from Firebase and increment it
-        last_message_id = ("last_message_id").get() or 0
+        last_message_id = ref.child("last_message_id").get() or 0
         last_message_id += 1
 
 
@@ -124,7 +124,7 @@ def post_chat():
     resp2 = post_message("model", model_response, message_id, firebase_url)
 
     # Update the last message id 
-    ("last_message_id").set(last_message_id)
+    ref.child("last_message_id").set(last_message_id)
 
 
 
