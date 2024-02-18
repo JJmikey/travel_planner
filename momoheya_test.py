@@ -83,7 +83,7 @@ def post_message(role, parts, message_id, firebase_url):
 
     # 將訊息發送到Firebase。
     response = requests.post(firebase_url, json=message)
-
+    return  jsonify(response)
     return response
 
 
@@ -119,7 +119,7 @@ def post_chat():
             # Get the last message id from Firebase and increment it
             last_message_id = ref.child("last_message_id").get() or 0
             last_message_id += 1
-            return jsonify(chat_data)
+            #return jsonify(chat_data)
 
 
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
