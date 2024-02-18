@@ -141,8 +141,8 @@ def post_chat():
         
 
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
-        ref.child("{}".format(message_id)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        ref.child("{}".format(message_id)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        ref.child("{}".format(message_id_user)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        ref.child("{}".format(message_id_model)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
         ref.child("last_message_id").set(message_id_model)
 
         #ref.child("messages/{}/user".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
