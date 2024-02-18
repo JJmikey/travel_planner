@@ -129,19 +129,23 @@ def post_chat():
             #return jsonify(chat_data)
 
 
+        last_message_id = ref.child("last_message_id").get() or 0
+        message_id_user = last_message_id +1  # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
+        message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
         #user_prompt = chat_data["user_prompt"]
         user_prompt = request.json.get('user_prompt', '')
         #model_response = chat_data["model_reply"]
         model_response = request.json.get('model_reply', '')
-        message_id = last_message_id  # 使用更新後的 last_message_id 作為當前消息的 ID。
+        
 
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
-        #ref.child("{}".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        #ref.child("{}".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
-        
-        ref.child("messages/{}/user".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        ref.child("messages/{}/model".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        ref.child("{}".format(message_id)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        ref.child("{}".format(message_id)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        ref.child("last_message_id").set(message_id_model)
+
+        #ref.child("messages/{}/user".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        #ref.child("messages/{}/model".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
         
         return jsonify({'message': 'chat added', 'id': message_id}), 201
 
