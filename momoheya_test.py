@@ -68,132 +68,36 @@ def notify_deleteTask():
     # post to Slack webhook URL
     response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})
 
-def post_message(role, parts, message_id, firebase_url):
-    # 獲取當前的時間截並格式化。
-    timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
-    # 構建訊息字典。
-    message = {
-        "id": message_id,
-        "role": role,
-        "parts": parts,
-        "timestamp": timestamp
-    }
-    try:
-        # 確保這裡的requests.post是正確調用
-        response = requests.post(firebase_url, json=message)
-        response.raise_for_status()  # 如果HTTP請求有錯則會拋出HTTPError
-        return response
-    except requests.exceptions.HTTPError as http_err:
-        error_detail = f"HTTP error (role: {role}, id: {message_id}): {http_err}"
-        print(error_detail)  # 記錄詳細的HTTP錯誤信息
-        return {"error": error_detail, "status_code": None}
-    except Exception as err:
-        error_detail = f"Other error (role: {role}, id: {message_id}): {err}"
-        print(error_detail)  # 記錄其他錯誤信息
-        return {"error": error_detail, "status_code": None}
-  
-
 
 
 if __name__ == "__main__":
       app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
-@app.route("/main", methods=['GET'])
+@app.route("/main", methods=['GET', 'POST'])
 def get_chat():
     ref = db.reference("/")
     if request.method == 'GET':
         # Read from Firebase
         chat_log = ref.get()
         return jsonify(chat_log)
-    
-@app.route("/main", methods=['POST'])
-def post_chat():
-    try:
-        global last_message_id, message_id
-        # 從 HTTP 請求的 body 中解析 JSON。
-        chat_data = request.json
-        firebase_url = "https://momoheya.vercel.app/main"
-        ref = db.reference("/")
-
-        # 確定 chat_data 是否包含所需的鍵
-        if chat_data is None or 'user_prompt' not in chat_data or 'model_reply' not in chat_data:
-            # 紀錄錯誤信息和收到的 chat_data，以便排查問題
-            print("Error: 'user_prompt' or 'model_reply' missing in received data.", chat_data)
-            return jsonify({"error": "Missing data in request"}), 400
-
-
-        if chat_data:
-            # Get the last message id from Firebase and increment it
-            last_message_id = ref.child("last_message_id").get() or 0
-            last_message_id += 1
-            #return jsonify(chat_data)
-
-
-        last_message_id = ref.child("last_message_id").get() or 0
-        last_message_id += 1
-        message_id_user = last_message_id   # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
-        message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
+    elif request.method == 'POST':
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
-        #user_prompt = chat_data["user_prompt"]
-        user_prompt = request.json.get('user_prompt', '')
-        #model_response = chat_data["model_reply"]
-        model_response = request.json.get('model_reply', '')
+        last_message_id = ref.child("last_message_id").get() or 0     
+        message_id_user = last_message_id +1  # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
+        message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
         
+        user_prompt = request.json.get('user_prompt', '')        
+        model_response = request.json.get('model_reply', '')        
 
+        #get current time
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
         ref.child("{}".format(message_id_user)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
         ref.child("{}".format(message_id_model)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
         ref.child("last_message_id").set(message_id_model)
 
-        #ref.child("messages/{}/user".format(message_id)).set({'id': message_id, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        #ref.child("messages/{}/model".format(message_id)).set({'id': message_id, 'role': "model", 'parts': model_response, "timestamp":timestamp})
         
-        return jsonify({'message': 'chat added', 'id': message_id}), 201
+        return jsonify({'message': 'chat added'}), 201
 
-        # 分別發送用戶訊息和模型回應到 Firebase。
-        resp1 = post_message("user", user_prompt, message_id, firebase_url)
-        resp2 = post_message("model", model_response, message_id, firebase_url)
-
-        # 檢查resp1和resp2是否為Response對象
-        if isinstance(resp1, requests.Response) and isinstance(resp2, requests.Response):
-            # 如果是Response對象，則可以安全地訪問status_code屬性
-            pass  # 這裡做進一步處理，例如update last_message_id等
-        else:
-            # 如果不是Response對象，則處理錯誤
-            error_messages = []
-            if isinstance(resp1, dict) and "error" in resp1:
-                error_messages.append(resp1["error"])
-            if isinstance(resp2, dict) and "error" in resp2:
-                error_messages.append(resp2["error"])
-            error_info = " ".join(error_messages)
-            # 可以在這裡記錄錯誤或者返回錯誤信息，例如通過print函數或者將錯誤發送到日誌系統
-            print(error_info)
-            # 返回帶有錯誤信息的HTTP響應給前端
-            return jsonify({"error": error_info}), 500
-
-
-        # 檢查是否成功發送了請求
-        if resp1 is not None and resp2 is not None:
-            # 如果兩個響應都不是 None，則進行下一步
-            ref.child("last_message_id").set(last_message_id)
-            return jsonify({
-                "user_message_status": resp1.status_code, 
-                "model_message_status": resp2.status_code
-            })
-        else:
-            # 如果有一個請求失敗，處理錯誤
-            error_message = "Failed to send message to Firebase."
-            # 如果resp1是 None，判斷是第一個請求失敗
-            if resp1 is None:
-                error_message += " User message failed."
-            # 如果resp2是 None，判斷是第二個請求失敗
-            if resp2 is None:
-                error_message += " Model message failed."
-            return jsonify({"error": error_message}), 500     
-
-    except Exception as e:
-        # 在實際部署時，應該要有更好的錯誤處理機制
-        return jsonify({"error": str(e)}), 500
     
 
 
