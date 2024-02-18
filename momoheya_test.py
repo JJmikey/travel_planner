@@ -83,7 +83,7 @@ def post_message(role, parts, message_id, firebase_url):
 
     # 將訊息發送到Firebase。
     response = requests.post(firebase_url, json=message)
-    return  jsonify(response)
+    
     return response
 
 
