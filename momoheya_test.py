@@ -3,6 +3,8 @@ import os
 import json
 import requests
 
+
+
 # Load the credentials from environment variable
 firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
 if firebase_service_account is not None:
@@ -69,29 +71,39 @@ if __name__ == "__main__":
       app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
 @app.route("/main", methods=['GET', 'POST'])
-def manage_tasks():
+def manage_chat():
     ref = db.reference("/")
     if request.method == 'GET':
         # Read from Firebase
         chat_log = ref.get()
         return jsonify(chat_log)
     elif request.method == 'POST':
-        task = request.json.get('task', '')
-        if task:
-            # Get current_task_id from Firebase and increment it
-            current_task_id = ref.child("current_task_id").get()
-            if current_task_id is None:
-                # If it doesn't exist, start it at 1
-                current_task_id = 1
+        chat_data = request.json
+        if chat_data:
+            # Extract role, parts, and timestamp
+            role = chat_data.get('role', '')
+            parts = chat_data.get('parts', '')
+            timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'  # Format timestamp with specified timezone
+
+            if role and parts:
+                # Get the last message id from Firebase and increment it
+                last_message_id = ref.child("last_message_id").get() or 0
+                last_message_id += 1
+            
+                # Write the message to Firebase
+                message_reference = f"messages/{last_message_id}"
+                ref.child(message_reference).set({
+                    'role': role,
+                    'parts': parts,
+                    'timestamp': timestamp
+                })
+
+                # Update the last message id 
+                ref.child("last_message_id").set(last_message_id)
+                return jsonify({'message': 'Message saved', 'id': last_message_id}), 201
             else:
-                current_task_id += 1
-            # Write to Firebase
-            ref.child("{}".format(current_task_id)).set({'id': current_task_id, 'task': task, 'status': 'pending'})
-            ref.child("current_task_id").set(current_task_id)
-            notify_addTask() # send notify to webhook URL
-            return jsonify({'message': 'Task added', 'id': current_task_id}), 201
-        else:
-            return jsonify({'message': 'Task is required'}), 400
+                return jsonify({'message': 'Both role and parts are required'}), 400
+
 
 @app.route("/main", methods=['PUT', 'DELETE'])
 def manage_specific_task():  # 不需要参数id
