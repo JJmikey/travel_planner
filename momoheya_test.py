@@ -130,8 +130,8 @@ def post_chat():
 
 
         last_message_id = ref.child("last_message_id").get() or 0
-        return jsonify({'last message id': last_message_id})
-        message_id_user = last_message_id +1  # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
+        last_message_id += 1
+        message_id_user = last_message_id   # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
         message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
         #user_prompt = chat_data["user_prompt"]
