@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "todo4coze.py",
+            "src": "momoheya_test.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "10mb"
@@ -11,8 +11,8 @@
     ],
     "rewrites": [
         {
-            "source": "/task",
-            "destination": "todo4coze.py"
+            "source": "/main",
+            "destination": "momoheya_test.py"
         }
     ],
     "headers": [
