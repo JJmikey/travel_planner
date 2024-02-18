@@ -130,8 +130,10 @@ def post_chat():
 
 
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
-        user_prompt = chat_data["user_prompt"]
-        model_response = chat_data["model_reply"]
+        #user_prompt = chat_data["user_prompt"]
+        user_prompt = request.json.get('user_prompt', '')
+        #model_response = chat_data["model_reply"]
+        model_response = request.json.get('model_reply')
         message_id = last_message_id  # 使用更新後的 last_message_id 作為當前消息的 ID。
 
 
