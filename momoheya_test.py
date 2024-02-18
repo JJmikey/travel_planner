@@ -78,13 +78,17 @@ def post_message(role, parts, message_id, firebase_url):
         "parts": parts,
         "timestamp": timestamp
     }
-
- 
-
-    # 將訊息發送到Firebase。
-    response = requests.post(firebase_url, json=message)
-    
-    return response
+    try:
+        # 確保這裡的requests.post是正確調用
+        response = requests.post(firebase_url, json=message)
+        response.raise_for_status()  # 如果HTTP請求有錯則會拋出HTTPError
+        return response
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")  # 提供更具體的錯誤信息
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+    # 如果遇到錯誤，返回None或者自訂錯誤處理
+    return None
 
 
 
