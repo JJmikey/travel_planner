@@ -11,7 +11,7 @@ import logging
 
 import firebase_admin
 from firebase_admin import credentials, db, storage
-from google.cloud import storage
+
 
 # Load the credentials from environment variable
 firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
@@ -24,13 +24,17 @@ else:
 # Assuming service_account_info is loaded from an environment variable or a file
 cred = credentials.Certificate(service_account_info)
 
-# Initialize the Firebase application with Firebase URL
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/',
-    'storageBucket': 'momoheya-f67bc.appspot.com'
-})
-
-# Now, you can use the db and storage modules from firebase_admin to interact with the database and storage.
+# 在初始化之前先檢查Firebase應用是否已經初始化
+try:
+    firebase_admin.get_app()
+except ValueError as e:
+    # 如果沒有初始化，則進行初始化
+    # Initialize the Firebase application with Firebase URL
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/',
+        'storageBucket': 'momoheya-f67bc.appspot.com'
+    })
+    # Now, you can use the db and storage modules from firebase_admin to interact with the database and storage.
 
 
 
