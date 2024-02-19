@@ -11,6 +11,7 @@ import logging
 
 import firebase_admin
 from firebase_admin import credentials, db, storage
+from google.cloud import storage
 
 # Load the credentials from environment variable
 firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
@@ -98,10 +99,16 @@ def store_image_to_firebase(image_url):
         # 从内存流上传图像
         blob.upload_from_file(image_blob, content_type='image/png')
         
+        # 這裡直接呼叫 blob 的 make_public 方法
+        blob.make_public()
+
+        print(
+        f"Blob {blob.name} is publicly accessible at {blob.public_url}"
+        )
+
         # 获取下载 URL
         return blob.public_url
 
-    
 
 
 
