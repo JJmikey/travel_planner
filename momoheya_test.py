@@ -114,14 +114,17 @@ if __name__ == "__main__":
 def manage_chat():
     ref = db.reference("/chat")
     if request.method == 'GET':
-        # Read from Firebase
-        chat_log = ref.child("/").get()
-        return jsonify(chat_log)
+        # 讀取 Firebase 的 '/chat' 節點
+        chat_data = ref.get()  # 不指定子節點，直接讀取 'chat' 節點下所有數據
+        if chat_data:
+            return jsonify(chat_data), 200
+        else:
+            return jsonify({"error": "No data found."}), 404
     
     elif request.method == 'POST':
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
         # Get last_message_id from Firebase and increment it
-        last_message_id = ref.child("chat/last_message_id").get()
+        last_message_id = ref.child("last_message_id").get()
         if last_message_id is None:
             # If it doesn't exist, start it at 1
             last_message_id = 1
@@ -157,7 +160,7 @@ def manage_chat():
         # 写入数据到 Firebase
         ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
         ref.child(f"log/{message_id_model}").set(model_message)
-        ref.child("chat/last_message_id").set(message_id_model)
+        ref.child("last_message_id").set(message_id_model)
      
 
 
