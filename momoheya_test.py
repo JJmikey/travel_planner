@@ -163,24 +163,18 @@ def manage_chat():
 
 
 @app.route("/character", methods=['POST'])
-def manage_character():
-    generated_image_url = request.json.get('img_url', '')
-    if generated
-        
-        return jsonify({'message': 'chat added'}), 201
-
-
-@app.route("/character", methods=['POST'])
 def manage_character():    
-    # 收集图像链接
-    generated_image_url = request.json.get('img_url', '')     
+    if request.method == 'POST':
+        # 收集图像链接
+        generated_image_url = request.json.get('img_url', '')     
         
-    # 函数用于下载图像并上传到 Firebase Storage
-    store_image_to_firebase(generated_image_url)
+        # 调用之前定义的函数来存储图像并获得图像的公开URL
+        image_public_url = store_image_to_firebase(generated_image_url)
 
-    # 现在您可以调用此函数来存储图像
-    image_public_url = store_image_to_firebase(generated_image_url)
-    return jsonify(image_public_url)
+        return jsonify({'image_url': image_public_url}), 200
+
+    # 如果不是 POST 請求
+    return "Invalid Method", 405
 
 
 @app.route("/main", methods=['PUT', 'DELETE'])
