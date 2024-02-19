@@ -115,7 +115,7 @@ def manage_chat():
     ref = db.reference("/chat")
     if request.method == 'GET':
         # Read from Firebase
-        chat_log = ref.child("chat").get()
+        chat_log = ref.child("/").get()
         return jsonify(chat_log)
     
     elif request.method == 'POST':
