@@ -79,6 +79,32 @@ def notify_deleteTask():
     # post to Slack webhook URL
     response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})
 
+def store_image_to_firebase(image_url):
+   # 使用 requests 库下载图像
+    response = requests.get(image_url)
+
+    if response.status_code == 200:
+        # 将响应内容作为图像存储到内存缓冲区
+        from io import BytesIO
+        image_blob = BytesIO(response.content)
+        
+        # 定义在 Firebase Storage 中的文件路径，使用圖像上傳時的時間戳作為文件名
+        file_path = f"images/{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+
+        # 上传图像到 Firebase Storage
+        bucket = storage.bucket()
+        blob = bucket.blob(file_path)
+        
+        # 从内存流上传图像
+        blob.upload_from_file(image_blob, content_type='image/png')
+        
+        # 获取下载 URL
+        return blob.public_url
+
+    
+
+
+
 
 
 if __name__ == "__main__":
@@ -131,47 +157,30 @@ def manage_chat():
         # 写入数据到 Firebase
         ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
         ref.child(f"log/{message_id_model}").set(model_message)
-        ref.child("/last_message_id").set(message_id_model)
+        ref.child("last_message_id").set(message_id_model)
+        ref.child("debug").set("debug")
+
+
+
+@app.route("/character", methods=['POST'])
+def manage_character():
+    generated_image_url = request.json.get('img_url', '')
+    if generated
         
         return jsonify({'message': 'chat added'}), 201
 
 
-@app.route("/character", methods=['GET', 'POST'])
-def manage_character():
-    if request.method == 'POST':
-        # 收集图像链接
-        generated_image_url = request.json.get('img_url', '')     
+@app.route("/character", methods=['POST'])
+def manage_character():    
+    # 收集图像链接
+    generated_image_url = request.json.get('img_url', '')     
         
-        # 假设这是我生成给您的图像链接
-        #generated_image_url = 'https://your-generated-image-url.com/image.png'
+    # 函数用于下载图像并上传到 Firebase Storage
+    store_image_to_firebase(generated_image_url)
 
-        # 函数用于下载图像并上传到 Firebase Storage
-        def store_image_to_firebase(image_url):
-            # 使用 requests 库下载图像
-            response = requests.get(image_url)
-    
-            if response.status_code == 200:
-                # 将响应内容作为图像存储到内存缓冲区
-                from io import BytesIO
-                image_blob = BytesIO(response.content)
-        
-                # 定义在 Firebase Storage 中的文件路径
-                file_path = 'path/to/store/image.png'
-
-                # 上传图像到 Firebase Storage
-                bucket = storage.bucket()
-                blob = bucket.blob(file_path)
-        
-                # 从内存流上传图像
-                blob.upload_from_file(image_blob, content_type='image/png')
-        
-                # 获取下载 URL
-                return blob.public_url
-
-        # 现在您可以调用此函数来存储图像
-        image_public_url = store_image_to_firebase(generated_image_url)
-
-
+    # 现在您可以调用此函数来存储图像
+    image_public_url = store_image_to_firebase(generated_image_url)
+    return jsonify(image_public_url)
 
 
 @app.route("/main", methods=['PUT', 'DELETE'])
