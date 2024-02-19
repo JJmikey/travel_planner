@@ -115,13 +115,13 @@ def manage_chat():
     ref = db.reference("/chat")
     if request.method == 'GET':
         # Read from Firebase
-        chat_log = ref("chat").get()
+        chat_log = ref.child("chat").get()
         return jsonify(chat_log)
     
     elif request.method == 'POST':
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
         # Get last_message_id from Firebase and increment it
-        last_message_id = ref.child("last_message_id").get()
+        last_message_id = ref.child("chat/last_message_id").get()
         if last_message_id is None:
             # If it doesn't exist, start it at 1
             last_message_id = 1
@@ -157,8 +157,8 @@ def manage_chat():
         # 写入数据到 Firebase
         ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
         ref.child(f"log/{message_id_model}").set(model_message)
-        ref.child("last_message_id").set(message_id_model)
-        ref.child("debug").set("debug")
+        ref.child("chat/last_message_id").set(message_id_model)
+     
 
 
 
