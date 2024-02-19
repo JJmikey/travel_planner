@@ -83,11 +83,7 @@ def notify_deleteTask():
     response = requests.post(webhook_url, json=slack_data, headers={'Content-Type': 'application/json'})
 
 def store_image_to_firebase(image_url):
-    # 創建客戶端物件
-    storage_client = storage.Client()
-
-    # 獲取 bucket 物件
-    bucket = storage_client.get_bucket('momoheya-f67bc.appspot.com')  #需用實際的 bucket 名稱替換
+    
     
     # 使用 requests 库下载图像
     response = requests.get(image_url)
