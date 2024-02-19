@@ -75,26 +75,48 @@ if __name__ == "__main__":
 
 @app.route("/main", methods=['GET', 'POST'])
 def get_chat():
-    ref = db.reference("/")
+    ref = db.reference("/chat")
     if request.method == 'GET':
         # Read from Firebase
-        chat_log = ref.get()
+        chat_log = ref.child("log").get()
         return jsonify(chat_log)
+    
     elif request.method == 'POST':
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
         last_message_id = ref.child("last_message_id").get() or 0     
         message_id_user = last_message_id +1  # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
         message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
         
+        # 收集用户和模型的数据
         user_prompt = request.json.get('user_prompt', '')        
         model_response = request.json.get('model_reply', '')        
 
         #get current time
-        timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'
-        ref.child("{}".format(message_id_user)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        ref.child("{}".format(message_id_model)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
-        ref.child("last_message_id").set(message_id_model)
+        timestamp = datetime.utcnow().isoformat(timespec='seconds') + 'Z'  # 假设你使用 UTC 时间
 
+
+        # 构建用户和模型消息的图像
+        user_message = {
+            'id': message_id_user,
+            'role': "user",
+            'parts': user_prompt,
+            "timestamp": timestamp
+        }
+        model_message = {
+            'id': message_id_model,
+            'role': "model",
+            'parts': model_response,
+            "timestamp": timestamp
+        }
+
+        #ref.child("{}".format(message_id_user)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
+        #ref.child("{}".format(message_id_model)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
+        #ref.child("last_message_id").set(message_id_model)
+
+        # 写入数据到 Firebase
+        ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
+        ref.child(f"log/{message_id_model}").set(model_message)
+        ref.child("last_message_id").set(message_id_model)
         
         return jsonify({'message': 'chat added'}), 201
 
