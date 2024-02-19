@@ -24,6 +24,7 @@ else:
 # Assuming service_account_info is loaded from an environment variable or a file
 cred = credentials.Certificate(service_account_info)
 
+# Initialize the Firebase application with Firebase URL
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/',
     'storageBucket': 'momoheya-f67bc.appspot.com'
@@ -31,9 +32,6 @@ firebase_admin.initialize_app(cred, {
 
 # Now, you can use the db and storage modules from firebase_admin to interact with the database and storage.
 
-
-# Initialize the Firebase application with Firebase URL
-firebase_admin.initialize_app(cred)
 
 
 
