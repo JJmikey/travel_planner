@@ -32,8 +32,8 @@ firebase_admin.initialize_app(cred, {
 # Now, you can use the db and storage modules from firebase_admin to interact with the database and storage.
 
 
-# Initialize the Firebase application with Firebase database URL
-#firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/'})
+# Initialize the Firebase application with Firebase URL
+firebase_admin.initialize_app(cred)
 
 
 
