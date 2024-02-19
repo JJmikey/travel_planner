@@ -5,6 +5,13 @@ import requests
 
 from datetime import datetime
 
+
+from flask import Flask, jsonify, request
+import logging
+
+import firebase_admin
+from firebase_admin import credentials, db, storage
+
 # Load the credentials from environment variable
 firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
 if firebase_service_account is not None:
@@ -13,17 +20,21 @@ else:
     print("'FIREBASE_SERVICE_ACCOUNT' is not set or empty")
     # handle this error appropriately...
 
+# Assuming service_account_info is loaded from an environment variable or a file
+cred = credentials.Certificate(service_account_info)
 
-from flask import Flask, jsonify, request
-import logging
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/',
+    'storageBucket': 'momoheya-f67bc.appspot.com'
+})
 
-import firebase_admin
-from firebase_admin import credentials, db
-
+# Now, you can use the db and storage modules from firebase_admin to interact with the database and storage.
 
 
 # Initialize the Firebase application with Firebase database URL
-firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/'})
+#firebase_admin.initialize_app(credentials.Certificate(service_account_info), {'databaseURL': 'https://momoheya-f67bc-default-rtdb.asia-southeast1.firebasedatabase.app/'})
+
+
 
 # link to Slack webhook URL
 webhook_url = os.getenv('SLACK_WEBHOOK_URL')
@@ -74,7 +85,7 @@ if __name__ == "__main__":
       app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) #for deploy on vercel
 
 @app.route("/main", methods=['GET', 'POST'])
-def get_chat():
+def manage_chat():
     ref = db.reference("/chat")
     if request.method == 'GET':
         # Read from Firebase
@@ -83,8 +94,15 @@ def get_chat():
     
     elif request.method == 'POST':
         # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
-        last_message_id = ref.child("last_message_id").get() or 0     
-        message_id_user = last_message_id +1  # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
+        # Get last_message_id from Firebase and increment it
+        last_message_id = ref.child("last_message_id").get()
+        if last_message_id is None:
+            # If it doesn't exist, start it at 1
+            last_message_id = 1
+        else:
+            last_message_id += 1
+      
+        message_id_user = last_message_id     # 使用更新後的 last_message_id 作為用戶當前消息的 ID。
         message_id_model = message_id_user+1  # 使用更新後的 last_message_id 作為model當前消息的 ID。
         
         # 收集用户和模型的数据
@@ -92,7 +110,7 @@ def get_chat():
         model_response = request.json.get('model_reply', '')        
 
         #get current time
-        timestamp = datetime.utcnow().isoformat(timespec='seconds') + 'Z'  # 假设你使用 UTC 时间
+        timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'  # 假设你使用香港时间（UTC+8）
 
 
         # 构建用户和模型消息的图像
@@ -109,10 +127,7 @@ def get_chat():
             "timestamp": timestamp
         }
 
-        #ref.child("{}".format(message_id_user)).set({'id': message_id_user, 'role': "user", 'parts': user_prompt, "timestamp":timestamp})
-        #ref.child("{}".format(message_id_model)).set({'id': message_id_model, 'role': "model", 'parts': model_response, "timestamp":timestamp})
-        #ref.child("last_message_id").set(message_id_model)
-
+       
         # 写入数据到 Firebase
         ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
         ref.child(f"log/{message_id_model}").set(model_message)
@@ -120,7 +135,41 @@ def get_chat():
         
         return jsonify({'message': 'chat added'}), 201
 
+
+@app.route("/character", methods=['GET', 'POST'])
+def manage_character():
+    if request.method == 'POST':
+        # 收集图像链接
+        generated_image_url = request.json.get('img_url', '')     
+        
+        # 假设这是我生成给您的图像链接
+        #generated_image_url = 'https://your-generated-image-url.com/image.png'
+
+        # 函数用于下载图像并上传到 Firebase Storage
+        def store_image_to_firebase(image_url):
+            # 使用 requests 库下载图像
+            response = requests.get(image_url)
     
+            if response.status_code == 200:
+                # 将响应内容作为图像存储到内存缓冲区
+                from io import BytesIO
+                image_blob = BytesIO(response.content)
+        
+                # 定义在 Firebase Storage 中的文件路径
+                file_path = 'path/to/store/image.png'
+
+                # 上传图像到 Firebase Storage
+                bucket = storage.bucket()
+                blob = bucket.blob(file_path)
+        
+                # 从内存流上传图像
+                blob.upload_from_file(image_blob, content_type='image/png')
+        
+                # 获取下载 URL
+                return blob.public_url
+
+        # 现在您可以调用此函数来存储图像
+        image_public_url = store_image_to_firebase(generated_image_url)
 
 
 
