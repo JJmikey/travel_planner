@@ -131,7 +131,7 @@ def manage_chat():
         # 写入数据到 Firebase
         ref.child(f"log/{message_id_user}").set(user_message)  # 这里使用了 f-string 格式化
         ref.child(f"log/{message_id_model}").set(model_message)
-        ref.child("last_message_id").set(message_id_model)
+        ref.child("/last_message_id").set(message_id_model)
         
         return jsonify({'message': 'chat added'}), 201
 
