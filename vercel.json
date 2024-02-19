@@ -13,6 +13,10 @@
         {
             "source": "/main",
             "destination": "momoheya_test.py"
+        }, 
+        {
+            "source": "/character",
+            "destination": "momoheya_test.py"
         }
     ],
     "headers": [
