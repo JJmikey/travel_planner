@@ -198,16 +198,17 @@ def trip_info():
 
         # 构建用户的图像
         trip_info = {
-            'id' : last_user_id,
-            'destination': required_fields.get('destination', ''),
-            'arrive_time': required_fields.get('arrive_time', ''),
+            'id': last_user_id,
+            'destination': request.json.get('destination', ''),
+            'arrive_time': request.json.get('arrive_time', ''),
             'no_of_stayed_days': no_of_stayed_days,
+            # 其他字段也相應地從request.json中獲取
         }
 
         # 特殊情況：arrival_date 和 departure_date 需要格式化
         trip_info['arrival_date'] = arrival_date.strftime('%Y-%m-%d') if arrival_date else ''
         trip_info['departure_date'] = departure_date.strftime('%Y-%m-%d') if departure_date else ''
-        trip_info['leave_time'] = request.json.get('leave_time')  # 刪除尾巴上的空白並設定 leave_time
+        trip_info['leave_time'] = request.json.get('leave_time', '')  # 刪除尾巴上的空白並設定 leave_time
         trip_info["timestamp"] = timestamp  # 現在時間戳記
 
 
