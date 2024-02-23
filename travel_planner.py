@@ -181,7 +181,7 @@ def trip_info():
         trip_info = {
             'id' : last_user_id,
             'destination': destination,
-            'arrival_date': "arrival_date",
+            'arrival_date': arrival_date,
             'arrive_time': arrive_time,
             'no_of_stayed_days': no_of_stayed_days,
             'departure_date' : departure_date.strftime('%Y年%m月%d日'),  # 確保格式化日期
