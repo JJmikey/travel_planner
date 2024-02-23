@@ -148,39 +148,26 @@ def trip_info():
             # 打印出缺失的字段名稱
             print(f"缺失的必須字段：{', '.join(missing_fields)}")
             # 可以在這裡添加代碼來處理缺失字段的情況，比如返回一個錯誤響應
-        
-        # 從請求體中提取用戶訊息，以及user's ID。
-        # Get last_message_id from Firebase and increment it
-        last_user_id = ref.child("last_user_id").get()
-        if last_user_id is None:
-            # If it doesn't exist, start it at 1
-            last_user_id = 1
-        else:
-            last_user_id += 1
-                  
-      
-        
-        
-        # 解析字串為 datetime 物件，注意日期格式匹配
-        try:
-            arrival_date = datetime.strptime(request.json.get('arrive_date', ''), '%Y-%m-%d')
-        except ValueError as e:
-        # 輸出錯誤信息，並處理異常（例如返回錯誤響應）
-            print(f"提供的日期格式不正確: {e}")
-        
-        
-        # 收集用户的数据
+            return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
+
+        # 提取並檢查 no_of_stayed_days 字段
         no_of_stayed_days_str = request.json.get('no_of_stayed_days', None)
         if no_of_stayed_days_str is None:
             print("缺失的必須字段：no_of_stayed_days")
-            # 應該在這裡處理這個缺失字段的情況，比如丟出一個錯誤或返回一個響應
-        else:
-            try:
-                no_of_stayed_days = int(no_of_stayed_days_str)  # 確保此變量已被賦值
-                # 繼續使用 no_of_stayed_days
-            except ValueError:
-                print("no_of_stayed_days 必須是一個整數")
-                # 處理這個錯誤，比如丟出一個錯誤或返回一個響應
+            return jsonify(error="Missing required field: no_of_stayed_days"), 400
+        try:
+            no_of_stayed_days = int(no_of_stayed_days_str)
+        except ValueError:
+            print("no_of_stayed_days 必須是一個整數")
+            return jsonify(error="no_of_stayed_days must be an integer"), 400
+
+        # 提取並檢查 arrive_date 字段
+        arrive_date_str = request.json.get('arrive_date', '')
+        try:
+            arrival_date = datetime.strptime(arrive_date_str, '%Y-%m-%d')
+        except ValueError as e:
+            print(f"提供的日期格式不正確: {e}")
+            return jsonify(error=f"Incorrect date format: {e}"), 400
 
         #設置逗留的天數
         stay_duration = timedelta(days=no_of_stayed_days)
@@ -191,7 +178,16 @@ def trip_info():
         # 輸出結果
         print(f"離開日本的日期是：{departure_date.strftime('%Y-%m-%d')}")
 
-        
+
+        # Get last_user_id from Firebase and increment it
+        last_user_id = ref.child("last_user_id").get()
+        if last_user_id is None:
+            # If it doesn't exist, start it at 1
+            last_user_id = 1
+        else:
+            last_user_id += 1
+                  
+                     
         #get current time
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'  # 假设你使用香港时间（UTC+8）
 
