@@ -168,8 +168,21 @@ def trip_info():
         # 輸出錯誤信息，並處理異常（例如返回錯誤響應）
             print(f"提供的日期格式不正確: {e}")
         
-        # 設定逗留的天數
-        no_of_stayed_days = int(no_of_stayed_days)
+        
+        # 收集用户的数据
+        no_of_stayed_days_str = request.json.get('no_of_stayed_days', None)
+        if no_of_stayed_days_str is None:
+            print("缺失的必須字段：no_of_stayed_days")
+            # 應該在這裡處理這個缺失字段的情況，比如丟出一個錯誤或返回一個響應
+        else:
+            try:
+                no_of_stayed_days = int(no_of_stayed_days_str)  # 確保此變量已被賦值
+                # 繼續使用 no_of_stayed_days
+            except ValueError:
+                print("no_of_stayed_days 必須是一個整數")
+                # 處理這個錯誤，比如丟出一個錯誤或返回一個響應
+
+        #設置逗留的天數
         stay_duration = timedelta(days=no_of_stayed_days)
 
         # 計算離開日本的日期
