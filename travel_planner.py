@@ -113,6 +113,13 @@ def store_image_to_firebase(image_url):
         # 获取下载 URL
         return blob.public_url
 
+def check_missing_variables(request_data, required_fields):
+    missing_fields = []
+    for field in required_fields:
+        if not request_data.get(field):
+            # 如果欄位不存在或者為空值，添加到缺失字段列表
+            missing_fields.append(field)
+    return missing_fields
 
 
 
@@ -133,7 +140,16 @@ def trip_info():
             return jsonify({"error": "No data found."}), 404
     
     elif request.method == 'POST':
-        # 從請求體中提取用戶訊息和模型回應，以及消息 ID。
+        # 定義必須的字段列表
+        required_fields = ['destination', 'arrive_date', 'arrive_time', 'no_of_stayed_days', 'step1_completed', 'leave_time']
+        # 檢查缺失的字段
+        missing_fields = check_missing_variables(request.json, required_fields)
+        if missing_fields:
+            # 打印出缺失的字段名稱
+            print(f"缺失的必須字段：{', '.join(missing_fields)}")
+            # 可以在這裡添加代碼來處理缺失字段的情況，比如返回一個錯誤響應
+        
+        # 從請求體中提取用戶訊息，以及user's ID。
         # Get last_message_id from Firebase and increment it
         last_user_id = ref.child("last_user_id").get()
         if last_user_id is None:
@@ -142,17 +158,12 @@ def trip_info():
         else:
             last_user_id += 1
                   
-        # 收集用户的数据
-        destination = request.json.get('destination', '')        
-        arrive_date_str  = request.json.get('arrive_date', '')        
-        arrive_time = request.json.get('arrive_time', '')               
-        no_of_stayed_days = request.json.get('no_of_stayed_days', '')   
-        step1_completed = request.json.get('step1_completed', False)
+      
         
         
         # 解析字串為 datetime 物件，注意日期格式匹配
         try:
-            arrival_date = datetime.strptime(arrive_date_str, '%Y-%m-%d')
+            arrival_date = datetime.strptime(request.json.get('arrive_date', ''), '%Y-%m-%d')
         except ValueError as e:
         # 輸出錯誤信息，並處理異常（例如返回錯誤響應）
             print(f"提供的日期格式不正確: {e}")
@@ -165,29 +176,31 @@ def trip_info():
         departure_date = arrival_date + stay_duration
 
         # 輸出結果
-        print(f"離開日本的日期是：{departure_date.strftime('%Y年%m月%d日')}")
+        print(f"離開日本的日期是：{departure_date.strftime('%Y-%m-%d')}")
 
         
         #get current time
         timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'  # 假设你使用香港时间（UTC+8）
 
-        # 檢查 step1_completed 並設定 leave_time
-        if step1_completed:
-            leave_time = request.json.get('leave_time', '')
-        else:
-            leave_time = 'To be updated'
+        
+        # 如果 step1_completed 為 True，則 'leave_time' 需要存在
+        if request.json.get('step1_completed'):
+            required_fields.append('leave_time')
 
-        # 构建用户和模型消息的图像
+        # 构建用户的图像
         trip_info = {
             'id' : last_user_id,
-            'destination': destination,
-            'arrival_date': arrival_date,
-            'arrive_time': arrive_time,
+            'destination': required_fields.get('destination', ''),
+            'arrive_time': required_fields.get('arrive_time', ''),
             'no_of_stayed_days': no_of_stayed_days,
-            'departure_date' : departure_date.strftime('%Y年%m月%d日'),  # 確保格式化日期
-            'leave_time': leave_time,  # 刪除尾巴上的空白並設定 leave_time
-            "timestamp": timestamp
         }
+
+        # 特殊情況：arrival_date 和 departure_date 需要格式化
+        trip_info['arrival_date'] = arrival_date.strftime('%Y-%m-%d') if arrival_date else ''
+        trip_info['departure_date'] = departure_date.strftime('%Y-%m-%d') if departure_date else ''
+        trip_info['leave_time'] = request.json.get('leave_time')  # 刪除尾巴上的空白並設定 leave_time
+        trip_info["timestamp"] = timestamp  # 現在時間戳記
+
 
         # 写入数据到 Firebase
         ref.child(f"log/{last_user_id}").set(trip_info)  # 这里使用了 f-string 格式化
