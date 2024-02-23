@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "momoheya_test.py",
+            "src": "travel_planner.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "10mb"
@@ -12,11 +12,7 @@
     "rewrites": [
         {
             "source": "/main",
-            "destination": "momoheya_test.py"
-        }, 
-        {
-            "source": "/character",
-            "destination": "momoheya_test.py"
+            "destination": "travel_planner.py"
         }
     ],
     "headers": [
