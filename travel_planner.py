@@ -216,7 +216,11 @@ def trip_info():
         ref.child(f"log/{last_user_id}").set(trip_info)  # 这里使用了 f-string 格式化
         ref.child("last_user_id").set(last_user_id)
 
-
+        # 返回成功信息和數據
+        return jsonify({
+            'message': 'Trip information successfully recorded.',
+            'data': trip_info
+        }), 200
 
 
 
