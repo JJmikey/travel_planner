@@ -149,8 +149,13 @@ def trip_info():
         no_of_stayed_days = request.json.get('no_of_stayed_days', '')   
         step1_completed = request.json.get('step1_completed', False)
         
-        # 解析字串為 datetime 物件
-        arrival_date = datetime.strptime(arrive_date_str, '%Y-%m-%d')
+        
+        # 解析字串為 datetime 物件，注意日期格式匹配
+        try:
+            arrival_date = datetime.strptime(arrive_date_str, '%Y-%m-%d')
+        except ValueError as e:
+        # 輸出錯誤信息，並處理異常（例如返回錯誤響應）
+            print(f"提供的日期格式不正確: {e}")
         
         # 設定逗留的天數
         no_of_stayed_days = int(no_of_stayed_days)
@@ -174,7 +179,7 @@ def trip_info():
 
         # 构建用户和模型消息的图像
         trip_info = {
-
+            'id' : last_user_id,
             'destination': destination,
             'arrival_date': "arrival_date",
             'arrive_time': arrive_time,
