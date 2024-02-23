@@ -116,8 +116,8 @@ def store_image_to_firebase(image_url):
 def check_missing_variables(request_data, required_fields):
     missing_fields = []
     for field in required_fields:
-        if not request_data.get(field):
-            # 如果欄位不存在或者為空值，添加到缺失字段列表
+        # 使用 has_key() 函式來檢查鍵是否存在，這適用於布爾值的檢查
+        if field not in request_data:
             missing_fields.append(field)
     return missing_fields
 
