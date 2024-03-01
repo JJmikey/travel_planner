@@ -4,7 +4,7 @@ import json
 import requests
 
 from datetime import datetime, timedelta
-
+import pytz
 
 from flask import Flask, jsonify, request
 import logging
@@ -189,8 +189,8 @@ def trip_info():
                   
                      
         #get current time
-        timestamp = datetime.utcnow().isoformat(timespec='seconds') + '+08:00'  # 假设你使用香港时间（UTC+8）
-
+        hongkong_timezone = pytz.timezone('Asia/Hong_Kong')
+        timestamp = datetime.now(hongkong_timezone).isoformat()
         
         # 如果 step1_completed 為 True，則 'leave_time' 需要存在
         if request.json.get('step1_completed'):
@@ -296,6 +296,8 @@ def manage_specific_task():  # 不需要参数id
         else:
             return jsonify({'message': 'Task not found'}), 404
                      
-       
+@app.route("/test1", methods=['GET'])
+def test1():
+    return 'Test successful!', 200
 
 
