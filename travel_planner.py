@@ -296,8 +296,6 @@ def manage_specific_task():  # 不需要参数id
         else:
             return jsonify({'message': 'Task not found'}), 404
                      
-@app.route("/test1", methods=['GET'])
-def test1():
-    return 'Test successful!', 200
+
 
 
